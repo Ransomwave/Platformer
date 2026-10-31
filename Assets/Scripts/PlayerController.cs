@@ -222,6 +222,7 @@ namespace deltaformer {
             print($"Player hit, HP: {HP}");
 
             StartCoroutine(HandleHitInvincibility(_invincibilityTime));
+            StartCoroutine(SpriteFlash.FlashRed(_spriteRenderer));
 
             OnPlayerDamaged.Invoke();
 
