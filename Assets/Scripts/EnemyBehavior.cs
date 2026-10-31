@@ -39,7 +39,7 @@ namespace deltaformer {
             }
 
             if (_hp <= 0) {
-                EnemyDeath();
+                Kill();
             }
         }
 
@@ -62,7 +62,7 @@ namespace deltaformer {
             }
         }
 
-        private void EnemyDeath() {
+        public void Kill() {
             _hp = 0;
             Destroy(gameObject);
         }

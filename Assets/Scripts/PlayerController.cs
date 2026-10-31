@@ -207,6 +207,11 @@ namespace deltaformer {
             HP = _maxHP;
         }
 
+        public void Kill() {
+            HP = 0;
+            OnPlayerDeath.Invoke();
+        }
+
         public void TakeDamage(int damage) {
             if (_isInvincible) {
                 return;

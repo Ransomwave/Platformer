@@ -11,6 +11,10 @@ namespace deltaformer {
         }
 
         public void TakeDamage(int damage) {
+            Kill();
+        }
+
+        public void Kill() {
             Destroy(gameObject);
         }
     }
