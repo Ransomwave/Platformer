@@ -1,0 +1,13 @@
+# Ignore standard Unity meta and asset files
+*.meta linguist-vendored
+*.asset linguist-vendored
+*.unity linguist-vendored
+
+# Ignore Shader files from statistics
+*.shader linguist-detectable=false
+*.compute linguist-detectable=false
+*.cginc linguist-detectable=false
+*.hlsl linguist-detectable=false
+
+# Explicitly ensure C# is tracked
+*.cs linguist-detectable=true
