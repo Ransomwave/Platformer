@@ -57,6 +57,10 @@ namespace deltaformer {
             SetFullScreen(_fullScreenToggle.isOn);
         }
 
+        private void OnDestroy() {
+            SaveConfiguration();
+        }
+
         public void SetMasterVolume(float volume) {
             if (_audioMixer != null) {
                 _audioMixer.SetFloat("Master", ToDecibels(volume));

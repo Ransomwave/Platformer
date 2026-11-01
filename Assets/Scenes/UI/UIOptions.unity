@@ -926,7 +926,7 @@ GameObject:
   - component: {fileID: 688436860}
   - component: {fileID: 688436859}
   m_Layer: 5
-  m_Name: SaveConfiguration
+  m_Name: BackButton
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -998,7 +998,7 @@ MonoBehaviour:
       m_Calls:
       - m_Target: {fileID: 411445741}
         m_TargetAssemblyTypeName: deltaformer.UIOptions, Assembly-CSharp
-        m_MethodName: SaveConfiguration
+        m_MethodName: Close
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -2488,7 +2488,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Save configuration
+  m_text: back
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: a2fbf9f6709e6104d8703e8cbb023485, type: 2}
   m_sharedMaterial: {fileID: 8723905943766882604, guid: a2fbf9f6709e6104d8703e8cbb023485, type: 2}
