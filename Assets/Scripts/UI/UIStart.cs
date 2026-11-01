@@ -4,6 +4,7 @@ using UnityEngine.SceneManagement;
 namespace deltaformer {
     public class UIStart : MonoBehaviour {
         public void PlayGame() {
+            GameManager.ResetBananaCount();
             SceneManager.LoadScene("Level1");
         }
 
