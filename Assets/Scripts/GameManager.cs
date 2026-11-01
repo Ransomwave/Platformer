@@ -52,6 +52,7 @@ namespace deltaformer {
         }
 
         private IEnumerator Fade(float targetAlpha) {
+            _fadeOverlay.blocksRaycasts = targetAlpha > 0f;
             var startAlpha = _fadeOverlay.alpha;
             for (var t = 0f; t < FadeTime; t += Time.unscaledDeltaTime) {
                 _fadeOverlay.alpha = Mathf.Lerp(startAlpha, targetAlpha, t / FadeTime);

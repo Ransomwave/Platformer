@@ -1,41 +1,49 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.SceneManagement;
 
 namespace deltaformer {
     public class PauseMenu : MonoBehaviour {
-        [Header("UI Pause Panel")]
-        [SerializeField] private GameObject _pauseMenuUI;
-
         private bool _isPaused = false;
 
-        private void Start() {
-            _pauseMenuUI.SetActive(false);
+        private InputAction _pauseAction;
+
+        private void Awake() {
+            _pauseAction = InputSystem.actions.FindAction("Player/Pause");
         }
 
-        void Update() {
-            if (Keyboard.current != null && Keyboard.current.escapeKey.wasPressedThisFrame) {
-                if (_isPaused) {
-                    Resume();
-                } else {
-                    Pause();
-                }
+        private void OnEnable() {
+            _pauseAction.Enable();
+            _pauseAction.performed += OnPause;
+            SceneManager.sceneUnloaded += OnSceneUnloaded;
+        }
+
+        private void OnDisable() {
+            _pauseAction.performed -= OnPause;
+            SceneManager.sceneUnloaded -= OnSceneUnloaded;
+        }
+
+        private void OnPause(InputAction.CallbackContext context) {
+            if (_isPaused) {
+                UIOptions.Close();
+            } else {
+                Pause();
             }
         }
 
-        public void Resume() {
-            if (_pauseMenuUI != null) {
-                _pauseMenuUI.SetActive(false);
+        private void OnSceneUnloaded(Scene scene) {
+            if (scene.name == UIOptions.SceneName) {
+                Resume();
             }
+        }
 
+        private void Resume() {
             Time.timeScale = 1f;
             _isPaused = false;
         }
 
-        void Pause() {
-            if (_pauseMenuUI != null) {
-                _pauseMenuUI.SetActive(true);
-            }
-
+        private void Pause() {
+            UIOptions.Open();
             Time.timeScale = 0f;
             _isPaused = true;
         }

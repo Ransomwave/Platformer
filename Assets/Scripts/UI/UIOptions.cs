@@ -5,6 +5,22 @@ using UnityEngine.SceneManagement;
 
 namespace deltaformer {
     public class UIOptions : MonoBehaviour {
+        public const string SceneName = "UIOptions";
+
+        public static bool IsOpen => SceneManager.GetSceneByName(SceneName).isLoaded;
+
+        public static void Open() {
+            if (!IsOpen) {
+                SceneManager.LoadScene(SceneName, LoadSceneMode.Additive);
+            }
+        }
+
+        public static void Close() {
+            if (IsOpen) {
+                SceneManager.UnloadSceneAsync(SceneName);
+            }
+        }
+
         [Header("Audio")]
         public AudioMixer audioMixer;
 
@@ -22,7 +38,7 @@ namespace deltaformer {
                 ApplyMasterVolume(savedMaster);
             }
 
-            // Cargar volumen de música
+            // Cargar volumen de mï¿½sica
             if (musicSlider != null) {
                 float savedMusic = PlayerPrefs.GetFloat("MusicVolume", 1f);
                 musicSlider.value = savedMusic;
@@ -44,7 +60,7 @@ namespace deltaformer {
             }
         }
 
-        // --- MÉTODOS DE APLICACIÓN EN TIEMPO REAL (SIN GUARDAR EN DISCO TODAVÍA) ---
+        // --- Mï¿½TODOS DE APLICACIï¿½N EN TIEMPO REAL (SIN GUARDAR EN DISCO TODAVï¿½A) ---
 
         public void SetMasterVolume(float volume) {
             ApplyMasterVolume(volume);
@@ -62,7 +78,7 @@ namespace deltaformer {
             Screen.fullScreen = isFullScreen;
         }
 
-        // Métodos internos que aplican el audio de forma inmediata
+        // Mï¿½todos internos que aplican el audio de forma inmediata
         private void ApplyMasterVolume(float volume) {
             if (audioMixer != null) {
                 audioMixer.SetFloat("Master", volume > 0 ? Mathf.Log10(volume) * 20 : -80f);
@@ -83,7 +99,7 @@ namespace deltaformer {
             }
         }
 
-        // --- BOTÓN DE GUARDAR CONFIGURACIÓN ---
+        // --- BOTï¿½N DE GUARDAR CONFIGURACIï¿½N ---
 
         public void SaveConfiguration() {
             // Guardamos los valores actuales de los sliders y el toggle en PlayerPrefs
@@ -95,13 +111,10 @@ namespace deltaformer {
             // Forzamos el guardado en disco
             PlayerPrefs.Save();
 
-            Debug.Log("¡Configuración guardada correctamente!");
-
         }
 
-        // Método para volver al menú principal
         public void ExitMenu() {
-            SceneManager.LoadScene("UIStart");
+            Close();
         }
     }
 }

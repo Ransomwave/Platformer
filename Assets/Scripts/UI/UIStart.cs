@@ -8,11 +8,10 @@ namespace deltaformer {
         }
 
         public void OpenOptions() {
-            SceneManager.LoadScene("UIOptions");
+            UIOptions.Open();
         }
 
         public void QuitGame() {
-            Debug.Log("Saliendo del juego...");
             Application.Quit();
         }
     }
