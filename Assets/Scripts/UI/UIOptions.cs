@@ -9,11 +9,6 @@ namespace deltaformer {
         public const string SceneName = "UIOptions";
         private const string MainMenuScene = "UIStart";
 
-        private const string MasterVolumeKey = "MasterVolume";
-        private const string MusicVolumeKey = "MusicVolume";
-        private const string SfxVolumeKey = "SfxVolume";
-        private const string FullScreenKey = "FullScreen";
-
         [Header("Audio")]
         [SerializeField] private AudioMixer _audioMixer;
 
@@ -39,6 +34,7 @@ namespace deltaformer {
         }
 
         private void Awake() {
+            Assert.IsNotNull(_audioMixer, "AudioMixer is not assigned in the UIOptions.");
             Assert.IsNotNull(_masterSlider, "MasterSlider is not assigned in the UIOptions.");
             Assert.IsNotNull(_musicSlider, "MusicSlider is not assigned in the UIOptions.");
             Assert.IsNotNull(_sfxSlider, "SfxSlider is not assigned in the UIOptions.");
@@ -46,56 +42,39 @@ namespace deltaformer {
         }
 
         private void Start() {
-            _masterSlider.value = PlayerPrefs.GetFloat(MasterVolumeKey, 1f);
-            _musicSlider.value = PlayerPrefs.GetFloat(MusicVolumeKey, 1f);
-            _sfxSlider.value = PlayerPrefs.GetFloat(SfxVolumeKey, 1f);
-            _fullScreenToggle.isOn = PlayerPrefs.GetInt(FullScreenKey, Screen.fullScreen ? 1 : 0) == 1;
+            _masterSlider.SetValueWithoutNotify(GameSettings.MasterVolume);
+            _musicSlider.SetValueWithoutNotify(GameSettings.MusicVolume);
+            _sfxSlider.SetValueWithoutNotify(GameSettings.SfxVolume);
+            _fullScreenToggle.SetIsOnWithoutNotify(GameSettings.FullScreen);
+        }
 
-            SetMasterVolume(_masterSlider.value);
-            SetMusicVolume(_musicSlider.value);
-            SetSfxVolume(_sfxSlider.value);
-            SetFullScreen(_fullScreenToggle.isOn);
+        private void OnDestroy() {
+            GameSettings.Save();
         }
 
         public void SetMasterVolume(float volume) {
-            if (_audioMixer != null) {
-                _audioMixer.SetFloat("Master", ToDecibels(volume));
-            } else {
-                // AudioListener is a "global" audio source that's always present, so we can set its volume directly if the AudioMixer is not assigned.
-                AudioListener.volume = volume;
-            }
+            GameSettings.MasterVolume = volume;
+            GameSettings.Apply(_audioMixer);
         }
 
         public void SetMusicVolume(float volume) {
-            if (_audioMixer == null) return;
-            _audioMixer.SetFloat("Music", ToDecibels(volume));
+            GameSettings.MusicVolume = volume;
+            GameSettings.Apply(_audioMixer);
         }
 
         public void SetSfxVolume(float volume) {
-            if (_audioMixer == null) return;
-            _audioMixer.SetFloat("SFX", ToDecibels(volume));
-
+            GameSettings.SfxVolume = volume;
+            GameSettings.Apply(_audioMixer);
         }
 
         public void SetFullScreen(bool isFullScreen) {
-            Screen.fullScreen = isFullScreen;
-        }
-
-        public void SaveConfiguration() {
-            PlayerPrefs.SetFloat(MasterVolumeKey, _masterSlider.value);
-            PlayerPrefs.SetFloat(MusicVolumeKey, _musicSlider.value);
-            PlayerPrefs.SetFloat(SfxVolumeKey, _sfxSlider.value);
-            PlayerPrefs.SetInt(FullScreenKey, _fullScreenToggle.isOn ? 1 : 0);
-            PlayerPrefs.Save();
+            GameSettings.FullScreen = isFullScreen;
+            GameSettings.Apply(_audioMixer);
         }
 
         public void ExitMenu() {
             Time.timeScale = 1f;
             SceneManager.LoadScene(MainMenuScene);
-        }
-
-        private static float ToDecibels(float volume) {
-            return volume > 0f ? Mathf.Log10(volume) * 20f : -80f;
         }
     }
 }

@@ -27,6 +27,8 @@ namespace deltaformer {
 
         public static void ResetBananaCount() => _bananaCount = 0;
 
+        public event Action OnBananaCountIncremented = delegate { };
+
         public event Action<int> OnBananaCountChanged = delegate { };
 
         // Scenes
@@ -64,6 +66,7 @@ namespace deltaformer {
 
         public void IncrementBananaCount() {
             _bananaCount++;
+            OnBananaCountIncremented.Invoke();
             OnBananaCountChanged.Invoke(_bananaCount);
         }
 
