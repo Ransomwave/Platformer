@@ -409,7 +409,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d5e681104d3d5f14c80497be84b29b5e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::deltaformer.UIOptions
-  _audioMixer: {fileID: 0}
+  _audioMixer: {fileID: 24100000, guid: 86141a213aa770742b802b67d6bbca26, type: 2}
   _masterSlider: {fileID: 1635176321}
   _musicSlider: {fileID: 588832830}
   _sfxSlider: {fileID: 627144756}
