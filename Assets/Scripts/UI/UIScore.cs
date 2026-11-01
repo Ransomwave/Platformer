@@ -13,7 +13,7 @@ namespace deltaformer {
 
             if (_gameManager != null) {
                 _gameManager.OnBananaCountChanged += UpdateScoreUI;
-                UpdateScoreUI(_gameManager.BananaCount);
+                UpdateScoreUI(GameManager.BananaCount);
             } else {
                 Debug.LogWarning("UIScore couldn't find a GameManager in the scene.");
             }

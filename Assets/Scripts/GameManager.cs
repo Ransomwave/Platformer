@@ -23,15 +23,16 @@ namespace deltaformer {
         // Player stats
         private static int _bananaCount = 0;
 
-        public int BananaCount => _bananaCount;
+        public static int BananaCount => _bananaCount;
+
+        public static void ResetBananaCount() => _bananaCount = 0;
 
         public event Action OnBananaCountIncremented = delegate { };
 
         public event Action<int> OnBananaCountChanged = delegate { };
 
         // Scenes
-        private const string MainMenuScene = "MainMenu";
-        private const string GameOverScene = "GameOver";
+        private const string GameWinScene = "UIWin";
 
         // the constant naming convention in Unity is PascalCase (no prefixed underscore) or `k_`
         // `k_` looks really ugly, so PascalCase it is
@@ -96,7 +97,7 @@ namespace deltaformer {
         private void OnEndDoorTouched() {
             if (_isLastLevel) {
                 Debug.Log("Game completed!");
-                // Implement game completion logic here (e.g., show a victory screen)
+                StartCoroutine(LoadLevelRoutine(GameWinScene));
             } else {
                 LoadLevel(_currentLevel + 1);
             }

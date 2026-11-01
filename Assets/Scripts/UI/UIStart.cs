@@ -8,6 +8,7 @@ namespace deltaformer {
         [SerializeField] private AudioMixer _audioMixer;
 
         public void PlayGame() {
+            GameManager.ResetBananaCount();
             SceneManager.LoadScene("Level1");
         }
 
