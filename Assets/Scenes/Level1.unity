@@ -441,6 +441,22 @@ PrefabInstance:
       propertyPath: m_Name
       value: Player
       objectReference: {fileID: 0}
+    - target: {fileID: 6511607313088861011, guid: 5cd87efc155c51e4583ef2a3cf9fffdc, type: 3}
+      propertyPath: _hurtClip
+      value: 
+      objectReference: {fileID: 8300000, guid: d5573da67abd13c43b136e0e74cb06d1, type: 3}
+    - target: {fileID: 6511607313088861011, guid: 5cd87efc155c51e4583ef2a3cf9fffdc, type: 3}
+      propertyPath: _jumpClip
+      value: 
+      objectReference: {fileID: 8300000, guid: 62cebf78a8561cd448a6a43ac415d86a, type: 3}
+    - target: {fileID: 6511607313088861011, guid: 5cd87efc155c51e4583ef2a3cf9fffdc, type: 3}
+      propertyPath: _deathClip
+      value: 
+      objectReference: {fileID: 8300000, guid: 3e202c27f5bf1c246af44f5a5bcb697f, type: 3}
+    - target: {fileID: 6511607313088861011, guid: 5cd87efc155c51e4583ef2a3cf9fffdc, type: 3}
+      propertyPath: _attackClip
+      value: 
+      objectReference: {fileID: 8300000, guid: 2a91c94167984d943a337e8a24ff394b, type: 3}
     - target: {fileID: 7908427938910550601, guid: 5cd87efc155c51e4583ef2a3cf9fffdc, type: 3}
       propertyPath: m_LocalPosition.x
       value: -6.748932
