@@ -1,4 +1,5 @@
 using System.Collections;
+using TMPro;
 using UnityEngine;
 using UnityEngine.Assertions;
 using UnityEngine.SceneManagement;
@@ -18,6 +19,9 @@ namespace deltaformer {
 
         [Header("UI")]
         [SerializeField] private CanvasGroup _fadeOverlay;
+        [SerializeField] private TextMeshProUGUI _scoreText;
+
+
 
         // Player stats
         private static int _bananaCount = 0;
@@ -44,6 +48,7 @@ namespace deltaformer {
         private void Start() {
             _fadeOverlay.alpha = 1f;
             StartCoroutine(Fade(0f));
+            UpdateScoreUI();
         }
 
         private IEnumerator Fade(float targetAlpha) {
@@ -57,6 +62,7 @@ namespace deltaformer {
 
         public void IncrementBananaCount() {
             _bananaCount++;
+            UpdateScoreUI();
         }
 
         private IEnumerator LoadLevelRoutine(string levelName) {
@@ -96,8 +102,17 @@ namespace deltaformer {
             if (_isTransitioning) {
                 return;
             }
-
+            _bananaCount -= 10;
+            UpdateScoreUI();
             StartCoroutine(RespawnRoutine());
+        }
+        private void UpdateScoreUI() {
+            if (_scoreText != null) {
+                if (_bananaCount < 0) {
+                    _bananaCount = 0;
+                }
+                _scoreText.text = "SCORE: " + _bananaCount;
+            }
         }
     }
 }
