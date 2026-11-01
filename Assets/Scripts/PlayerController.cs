@@ -136,6 +136,9 @@ namespace deltaformer {
             }
 
             StartCoroutine(OnAttackEnd());
+
+            // grant a 1s invincibility period after attacking, since enemy damage is contact-based and it's unavoidable to lose HP when attacking an enemy
+            StartCoroutine(AttackInvincibility(_invincibilityTime));
         }
 
         private IEnumerator OnAttackEnd() {
@@ -199,6 +202,12 @@ namespace deltaformer {
         }
 
         private IEnumerator HandleHitInvincibility(float duration) {
+            _isInvincible = true;
+            yield return new WaitForSeconds(duration);
+            _isInvincible = false;
+        }
+
+        private IEnumerator AttackInvincibility(float duration) {
             _isInvincible = true;
             yield return new WaitForSeconds(duration);
             _isInvincible = false;
