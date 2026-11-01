@@ -50,6 +50,7 @@ namespace deltaformer {
         public event Action OnPlayerAttack = delegate { };
         public event Action OnPlayerDeath = delegate { };
         public event Action OnPlayerDamaged = delegate { };
+        public event Action OnPlayerJump = delegate { };
 
         private void Awake() {
             HP = _maxHP;
@@ -112,6 +113,7 @@ namespace deltaformer {
 
             _rigidBody.AddForce(Vector2.up * _jumpForce, ForceMode2D.Impulse);
             _isGrounded = false;
+            OnPlayerJump.Invoke();
         }
 
         private void OnAttack(InputAction.CallbackContext context) {
