@@ -1,12 +1,29 @@
 using UnityEngine;
-using UnityEngine.UI;
+using UnityEngine.Assertions;
 using UnityEngine.Audio;
 using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 
 namespace deltaformer {
     public class UIOptions : MonoBehaviour {
         public const string SceneName = "UIOptions";
+        private const string MainMenuScene = "UIStart";
 
+        private const string MasterVolumeKey = "MasterVolume";
+        private const string MusicVolumeKey = "MusicVolume";
+        private const string SfxVolumeKey = "SfxVolume";
+        private const string FullScreenKey = "FullScreen";
+
+        [Header("Audio")]
+        [SerializeField] private AudioMixer _audioMixer;
+
+        [Header("UI References")]
+        [SerializeField] private Slider _masterSlider;
+        [SerializeField] private Slider _musicSlider;
+        [SerializeField] private Slider _sfxSlider;
+        [SerializeField] private Toggle _fullScreenToggle;
+
+        // figure out if the options menu is open by checking if the scene is loaded
         public static bool IsOpen => SceneManager.GetSceneByName(SceneName).isLoaded;
 
         public static void Open() {
@@ -21,100 +38,64 @@ namespace deltaformer {
             }
         }
 
-        [Header("Audio")]
-        public AudioMixer audioMixer;
-
-        [Header("UI References")]
-        public Slider masterSlider;
-        public Slider musicSlider;
-        public Slider sfxSlider;
-        public Toggle fullScreenToggle;
-
-        private void Start() {
-            // Cargar el volumen general guardado (por defecto a 1 si es la primera vez)
-            if (masterSlider != null) {
-                float savedMaster = PlayerPrefs.GetFloat("MasterVolume", 1f);
-                masterSlider.value = savedMaster;
-                ApplyMasterVolume(savedMaster);
-            }
-
-            // Cargar volumen de m�sica
-            if (musicSlider != null) {
-                float savedMusic = PlayerPrefs.GetFloat("MusicVolume", 1f);
-                musicSlider.value = savedMusic;
-                ApplyMusicVolume(savedMusic);
-            }
-
-            // Cargar volumen de efectos (SFX)
-            if (sfxSlider != null) {
-                float savedSfx = PlayerPrefs.GetFloat("SfxVolume", 1f);
-                sfxSlider.value = savedSfx;
-                ApplySfxVolume(savedSfx);
-            }
-
-            // Configurar el estado inicial y guardado del Toggle de pantalla completa
-            if (fullScreenToggle != null) {
-                bool isFullScreen = PlayerPrefs.GetInt("FullScreen", Screen.fullScreen ? 1 : 0) == 1;
-                fullScreenToggle.isOn = isFullScreen;
-                Screen.fullScreen = isFullScreen;
-            }
+        private void Awake() {
+            Assert.IsNotNull(_masterSlider, "MasterSlider is not assigned in the UIOptions.");
+            Assert.IsNotNull(_musicSlider, "MusicSlider is not assigned in the UIOptions.");
+            Assert.IsNotNull(_sfxSlider, "SfxSlider is not assigned in the UIOptions.");
+            Assert.IsNotNull(_fullScreenToggle, "FullScreenToggle is not assigned in the UIOptions.");
         }
 
-        // --- M�TODOS DE APLICACI�N EN TIEMPO REAL (SIN GUARDAR EN DISCO TODAV�A) ---
+        private void Start() {
+            _masterSlider.value = PlayerPrefs.GetFloat(MasterVolumeKey, 1f);
+            _musicSlider.value = PlayerPrefs.GetFloat(MusicVolumeKey, 1f);
+            _sfxSlider.value = PlayerPrefs.GetFloat(SfxVolumeKey, 1f);
+            _fullScreenToggle.isOn = PlayerPrefs.GetInt(FullScreenKey, Screen.fullScreen ? 1 : 0) == 1;
+
+            SetMasterVolume(_masterSlider.value);
+            SetMusicVolume(_musicSlider.value);
+            SetSfxVolume(_sfxSlider.value);
+            SetFullScreen(_fullScreenToggle.isOn);
+        }
 
         public void SetMasterVolume(float volume) {
-            ApplyMasterVolume(volume);
+            if (_audioMixer != null) {
+                _audioMixer.SetFloat("Master", ToDecibels(volume));
+            } else {
+                // AudioListener is a "global" audio source that's always present, so we can set its volume directly if the AudioMixer is not assigned.
+                AudioListener.volume = volume;
+            }
         }
 
         public void SetMusicVolume(float volume) {
-            ApplyMusicVolume(volume);
+            if (_audioMixer == null) return;
+            _audioMixer.SetFloat("Music", ToDecibels(volume));
         }
 
         public void SetSfxVolume(float volume) {
-            ApplySfxVolume(volume);
+            if (_audioMixer == null) return;
+            _audioMixer.SetFloat("SFX", ToDecibels(volume));
+
         }
 
         public void SetFullScreen(bool isFullScreen) {
             Screen.fullScreen = isFullScreen;
         }
 
-        // M�todos internos que aplican el audio de forma inmediata
-        private void ApplyMasterVolume(float volume) {
-            if (audioMixer != null) {
-                audioMixer.SetFloat("Master", volume > 0 ? Mathf.Log10(volume) * 20 : -80f);
-            } else {
-                AudioListener.volume = volume;
-            }
-        }
-
-        private void ApplyMusicVolume(float volume) {
-            if (audioMixer != null) {
-                audioMixer.SetFloat("Music", volume > 0 ? Mathf.Log10(volume) * 20 : -80f);
-            }
-        }
-
-        private void ApplySfxVolume(float volume) {
-            if (audioMixer != null) {
-                audioMixer.SetFloat("SFX", volume > 0 ? Mathf.Log10(volume) * 20 : -80f);
-            }
-        }
-
-        // --- BOT�N DE GUARDAR CONFIGURACI�N ---
-
         public void SaveConfiguration() {
-            // Guardamos los valores actuales de los sliders y el toggle en PlayerPrefs
-            if (masterSlider != null) PlayerPrefs.SetFloat("MasterVolume", masterSlider.value);
-            if (musicSlider != null) PlayerPrefs.SetFloat("MusicVolume", musicSlider.value);
-            if (sfxSlider != null) PlayerPrefs.SetFloat("SfxVolume", sfxSlider.value);
-            if (fullScreenToggle != null) PlayerPrefs.SetInt("FullScreen", fullScreenToggle.isOn ? 1 : 0);
-
-            // Forzamos el guardado en disco
+            PlayerPrefs.SetFloat(MasterVolumeKey, _masterSlider.value);
+            PlayerPrefs.SetFloat(MusicVolumeKey, _musicSlider.value);
+            PlayerPrefs.SetFloat(SfxVolumeKey, _sfxSlider.value);
+            PlayerPrefs.SetInt(FullScreenKey, _fullScreenToggle.isOn ? 1 : 0);
             PlayerPrefs.Save();
-
         }
 
         public void ExitMenu() {
-            Close();
+            Time.timeScale = 1f;
+            SceneManager.LoadScene(MainMenuScene);
+        }
+
+        private static float ToDecibels(float volume) {
+            return volume > 0f ? Mathf.Log10(volume) * 20f : -80f;
         }
     }
 }
