@@ -1,6 +1,5 @@
 using System;
 using System.Collections;
-using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -10,19 +9,22 @@ namespace deltaformer {
         [SerializeField] private float _speed = 6f;
         [SerializeField] private float _jumpForce = 10f;
         [SerializeField] private float _invincibilityTime = 1f; // Invincibility time in seconds after taking damage
+        [SerializeField] private int _maxHP = 3;
 
         [Header("Attack Settings")]
         [SerializeField] private float _attackCooldown = 0.3f;
-        private const float _attackPushForce = 5f; // Force applied when attacking
-        private const float _attackDuration = 0.2f;
+        private const float AttackPushForce = 5f; // Force applied when attacking
+        private const float AttackDuration = 0.2f;
 
+        private const float DropThroughDuration = 0.8f;
 
-        private int _hp = 3;
+        public int HP { get; private set; }
 
         private Vector2 _moveDirection;
         private Vector2 _currentLookDirection = Vector2.right;
 
         private Rigidbody2D _rigidBody;
+        private Collider2D _playerCollider;
         private Collider2D _hitboxCollider;
 
         private bool _canAttack = true;
@@ -46,13 +48,15 @@ namespace deltaformer {
         };
 
         public event Action OnPlayerAttack = delegate { };
-        public event Action OnPlayerDie = delegate { };
+        public event Action OnPlayerDeath = delegate { };
         public event Action OnPlayerDamaged = delegate { };
 
         private void Awake() {
+            HP = _maxHP;
             _animator = GetComponentInChildren<Animator>();
             _spriteRenderer = GetComponentInChildren<SpriteRenderer>();
             _rigidBody = GetComponent<Rigidbody2D>();
+            _playerCollider = GetComponent<Collider2D>();
             _hitboxCollider = transform.Find("Hitbox").GetComponent<Collider2D>();
 
             _moveAction = InputSystem.actions.FindAction("Player/Move");
@@ -123,7 +127,7 @@ namespace deltaformer {
             _animator.SetTrigger("Attack");
 
             // push slightly towards the direction we're facing
-            _rigidBody.AddForce(_currentLookDirection * _attackPushForce, ForceMode2D.Impulse);
+            _rigidBody.AddForce(_currentLookDirection * AttackPushForce, ForceMode2D.Impulse);
 
             if (_currentLookDirection.x > 0) {
                 _hitboxCollider.transform.localPosition = new Vector3(0.5f, 0, 0);
@@ -132,15 +136,14 @@ namespace deltaformer {
             }
 
             StartCoroutine(OnAttackEnd());
-            print("Player attacked!!!");
         }
 
         private IEnumerator OnAttackEnd() {
             _canAttack = false;
-            yield return new WaitForSeconds(_attackDuration);
+            yield return new WaitForSeconds(AttackDuration);
             _hitboxCollider.enabled = false;
             _isAttacking = false;
-            _hitboxCollider.transform.localPosition = new Vector3(0, 0, 0);
+            _hitboxCollider.transform.localPosition = Vector3.zero;
 
             yield return new WaitForSeconds(_attackCooldown);
             _canAttack = true;
@@ -158,33 +161,72 @@ namespace deltaformer {
         }
 
         private void Update() {
+            if (!_isAttacking) {
+                _moveDirection = _moveAction.ReadValue<Vector2>();
+            }
+
+            // drop through one-way platforms when holding down
+            if (_moveDirection.y < -0.5f && _isGrounded) {
+                var feetPosition = new Vector2(transform.position.x, transform.position.y - 1.1f);
+                var feetBoxSize = new Vector2(0.6f, 0.3f);
+
+                foreach (var collider in Physics2D.OverlapBoxAll(feetPosition, feetBoxSize, 0f)) {
+                    if (collider != _playerCollider && collider.GetComponent<PlatformEffector2D>() != null) {
+                        StartCoroutine(DropThroughPlatform(collider));
+                        break;
+                    }
+                }
+            }
+
             _animator.SetFloat("Speed", Mathf.Abs(_moveDirection.x));
             _spriteRenderer.flipX = _currentLookDirection.x < 0;
             _animator.SetBool("IsGrounded", _isGrounded);
             _animator.SetFloat("VerticalSpeed", _rigidBody.linearVelocity.y);
         }
 
-        public IEnumerator HandleHitInvincibility(float duration) {
+        private IEnumerator DropThroughPlatform(Collider2D platformCollider) {
+            Physics2D.IgnoreCollision(_playerCollider, platformCollider, true);
+            _isGrounded = false;
+
+            yield return new WaitForSeconds(DropThroughDuration);
+
+            if (platformCollider != null) {
+                Physics2D.IgnoreCollision(_playerCollider, platformCollider, false);
+            }
+        }
+
+        private IEnumerator HandleHitInvincibility(float duration) {
             _isInvincible = true;
             yield return new WaitForSeconds(duration);
             _isInvincible = false;
         }
 
+        public void Respawn(Vector3 position) {
+            _rigidBody.linearVelocity = Vector2.zero;
+            transform.position = position;
+            HP = _maxHP;
+        }
+
+        public void Kill() {
+            HP = 0;
+            OnPlayerDeath.Invoke();
+        }
+
         public void TakeDamage(int damage) {
-            _hp -= damage;
-
-            print($"Player took {damage} damage! HP: {_hp}");
-
             if (_isInvincible) {
                 return;
             }
+
+            HP -= damage;
+
+            print($"Player hit, HP: {HP}");
 
             StartCoroutine(HandleHitInvincibility(_invincibilityTime));
 
             OnPlayerDamaged.Invoke();
 
-            if (_hp <= 0) {
-                OnPlayerDie.Invoke();
+            if (HP <= 0) {
+                OnPlayerDeath.Invoke();
             }
         }
     }
