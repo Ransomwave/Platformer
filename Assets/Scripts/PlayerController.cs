@@ -91,7 +91,7 @@ namespace deltaformer {
         }
 
         private void OnMove(InputAction.CallbackContext context) {
-            if (_isAttacking) {
+            if (Time.timeScale == 0f || _isAttacking) {
                 _moveDirection = Vector2.zero;
                 return;
             }
@@ -106,7 +106,7 @@ namespace deltaformer {
         }
 
         private void OnJump(InputAction.CallbackContext context) {
-            if (!_isGrounded || _isAttacking) {
+            if (Time.timeScale == 0f || !_isGrounded || _isAttacking) {
                 return;
             }
 
@@ -115,7 +115,7 @@ namespace deltaformer {
         }
 
         private void OnAttack(InputAction.CallbackContext context) {
-            if (_isAttacking || !_canAttack) {
+            if (Time.timeScale == 0f || _isAttacking || !_canAttack) {
                 return;
             }
 
@@ -161,6 +161,9 @@ namespace deltaformer {
         }
 
         private void Update() {
+            if (Time.timeScale == 0f) {
+                return;
+            }
             if (!_isAttacking) {
                 _moveDirection = _moveAction.ReadValue<Vector2>();
             }
@@ -205,6 +208,8 @@ namespace deltaformer {
             _rigidBody.linearVelocity = Vector2.zero;
             transform.position = position;
             HP = _maxHP;
+
+            OnPlayerDamaged.Invoke();
         }
 
         public void Kill() {
